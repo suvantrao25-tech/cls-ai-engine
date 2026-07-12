@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
 
@@ -8,7 +8,15 @@ export default function Home() {
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [freeUses, setFreeUses] = useState(3);
 
+useEffect(() => {
+  const savedUses = localStorage.getItem("cls_free_uses");
+
+  if (savedUses) {
+    setFreeUses(parseInt(savedUses));
+  }
+}, []);
 
   const templates = [
     {
@@ -34,8 +42,13 @@ export default function Home() {
   ];
 
 
-
-  const generateAI = async () => {
+<p className="text-sm text-gray-600 mt-3">
+  Free AI Generations Left: <b>{freeUses}</b> / 3
+</p>
+  const generateAI = async () => {if (freeUses <= 0) {
+  alert("Your 3 free AI generations are finished. Please Login or Create a Free Account.");
+  return;
+}
 
     if (!prompt.trim()) {
       alert("Please enter a prompt.");
@@ -68,8 +81,11 @@ export default function Home() {
       const data = await res.json();
 
       setResponse(data.result);
+const remaining = freeUses - 1;
 
+setFreeUses(remaining);
 
+localStorage.setItem("cls_free_uses", remaining.toString());
     } catch (error) {
 
       setResponse(
@@ -206,7 +222,7 @@ export default function Home() {
 
           onClick={generateAI}
 
-          disabled={loading}
+          disabled={loading || freeUses <= 0}
 
           className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg disabled:bg-gray-400"
 
@@ -225,7 +241,16 @@ export default function Home() {
 href="https://app.creatorlaunchspace.com/login"
 className="bg-blue-600 text-white px-6 py-3 rounded-lg"
 >
-Login
+{freeUses <= 0 && (
+  <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-4 rounded-lg mt-6">
+    <h3 className="font-bold">
+      🎉 Your free limit is over!
+    </h3>
+    <p className="mt-2">
+      Create a free account to continue generating unlimited AI content, save your history, and access premium features.
+    </p>
+  </div>
+)}
 </a>
 
 
@@ -233,7 +258,16 @@ Login
 href="https://app.creatorlaunchspace.com/signup"
 className="bg-gray-900 text-white px-6 py-3 rounded-lg"
 >
-Create Free Account
+{freeUses <= 0 && (
+  <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-4 rounded-lg mt-6">
+    <h3 className="font-bold">
+      🎉 Your free limit is over!
+    </h3>
+    <p className="mt-2">
+      Create a free account to continue generating unlimited AI content, save your history, and access premium features.
+    </p>
+  </div>
+)}
 </a>
 
 </div>
