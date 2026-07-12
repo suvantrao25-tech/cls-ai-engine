@@ -219,7 +219,24 @@ export default function Home() {
 
         </button>
 
+<div className="flex gap-4 mt-6">
 
+<a
+href="https://app.creatorlaunchspace.com/login"
+className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+>
+Login
+</a>
+
+
+<a
+href="https://app.creatorlaunchspace.com/signup"
+className="bg-gray-900 text-white px-6 py-3 rounded-lg"
+>
+Create Free Account
+</a>
+
+</div>
 
 
 
