@@ -1,7 +1,41 @@
+"use client";
+
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Dashboard() {
+
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+
+    const loadProfile = async () => {
+
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.log(error.message);
+        return;
+      }
+
+      setProfile(data);
+
+    };
+
+    loadProfile();
+
+  }, []);
+
   return (
     <main className="flex bg-gray-100 min-h-screen">
 
@@ -28,8 +62,8 @@ export default function Dashboard() {
     </h3>
 
     <p className="text-3xl font-bold mt-3">
-      24
-    </p>
+  {profile?.blogs_generated ?? 0}
+</p>
   </div>
 
 
@@ -39,8 +73,8 @@ export default function Dashboard() {
     </h3>
 
     <p className="text-3xl font-bold mt-3">
-      45,000
-    </p>
+  {profile?.words_generated ?? 0}
+</p>
   </div>
 
 
@@ -50,8 +84,8 @@ export default function Dashboard() {
     </h3>
 
     <p className="text-3xl font-bold mt-3">
-      18
-    </p>
+  {profile?.saved_content ?? 0}
+</p>
   </div>
 
 
@@ -61,8 +95,8 @@ export default function Dashboard() {
     </h3>
 
     <p className="text-3xl font-bold mt-3">
-      FREE
-    </p>
+  {profile?.plan ?? "FREE"}
+</p>
   </div>
 
 </div>{/* AI Credits Section */}
@@ -76,8 +110,8 @@ export default function Dashboard() {
     </h2>
 
     <span className="text-gray-500">
-      4500 / 5000 Words
-    </span>
+  {profile?.credits ?? 5000} / 5000 Words
+</span>
 
   </div>
 
@@ -94,8 +128,10 @@ export default function Dashboard() {
 
 
   <p className="text-gray-500 mt-3">
-    90% credits remaining
-  </p>
+  {profile
+    ? `${Math.round((profile.credits / 5000) * 100)}% credits remaining`
+    : "100% credits remaining"}
+</p>
 
 
 </div>{/* Quick AI Tools */}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function AIForm({
   prompt,
@@ -14,6 +15,22 @@ export default function AIForm({
 
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+
+  const checkUser = async () => {
+
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
+
+    setUser(session?.user || null);
+
+  };
+
+  checkUser();
+
+}, []);
 
 
   const generateAI = async () => {
@@ -71,6 +88,9 @@ export default function AIForm({
   return (
 
     <div className="mt-6">
+      <p className="mt-3 text-sm text-gray-600">
+  User: {user ? user.email : "Not Logged In"}
+</p>
 
       <textarea
 

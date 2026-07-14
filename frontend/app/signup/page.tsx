@@ -8,22 +8,46 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = async () => {
+ const handleSignup = async () => {
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
-    if (error) {
-      alert(error.message);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+
+  if (data.user) {
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        id: data.user.id,
+        email: data.user.email,
+        name: "Creator",
+        plan: "FREE",
+        credits: 5000,
+        words_generated: 0,
+        blogs_generated: 0
+      });
+
+
+    if (profileError) {
+      alert(profileError.message);
       return;
     }
 
-    alert("Account created successfully! Please check your email.");
-    console.log(data);
+  }
 
-  };
+
+  alert("Account created successfully! Please check your email.");
+
+};
 
 
   return (
