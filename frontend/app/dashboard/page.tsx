@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 export default function Dashboard() {
 
   const [profile, setProfile] = useState<any>(null);
+  const [recentHistory, setRecentHistory] = useState<any[]>([]);
 
   useEffect(() => {
 
@@ -29,6 +30,21 @@ export default function Dashboard() {
       }
 
       setProfile(data);
+      const { data: historyData, error: historyError } = await supabase
+  .from("history")
+  .select("*")
+  .eq("user_id", user.id)
+  .order("created_at", { ascending: false })
+  .limit(3);
+
+
+if (historyError) {
+  console.log(historyError);
+  return;
+}
+
+
+setRecentHistory(historyData || []);
 
     };
 
@@ -84,7 +100,7 @@ export default function Dashboard() {
     </h3>
 
     <p className="text-3xl font-bold mt-3">
-  {profile?.saved_content ?? 0}
+  0
 </p>
   </div>
 
@@ -248,67 +264,45 @@ export default function Dashboard() {
 
   <div className="bg-white rounded-xl shadow p-6 space-y-5">
 
+{recentHistory.map((item) => (
 
-    <div className="flex justify-between items-center border-b pb-4">
+<div
+key={item.id}
+className="flex justify-between items-center border-b pb-4"
+>
 
-      <div>
-        <h3 className="font-bold">
-          AI Marketing Tools in 2026
-        </h3>
+<div>
 
-        <p className="text-gray-500">
-          ✍️ Blog Writer
-        </p>
-      </div>
+<h3 className="font-bold">
+{item.prompt}
+</h3>
 
-      <span className="text-gray-400">
-        Today
-      </span>
+<p className="text-gray-500">
+✍️ {item.template}
+</p>
 
-    </div>
-
-
-
-    <div className="flex justify-between items-center border-b pb-4">
-
-      <div>
-        <h3 className="font-bold">
-          AssemblyAI Review
-        </h3>
-
-        <p className="text-gray-500">
-          🔍 SEO Writer
-        </p>
-      </div>
-
-      <span className="text-gray-400">
-        Yesterday
-      </span>
-
-    </div>
+</div>
 
 
-
-    <div className="flex justify-between items-center">
-
-      <div>
-        <h3 className="font-bold">
-          Product Launch Email
-        </h3>
-
-        <p className="text-gray-500">
-          📧 Email Writer
-        </p>
-      </div>
-
-      <span className="text-gray-400">
-        2 days ago
-      </span>
-
-    </div>
+<span className="text-gray-400 text-sm">
+{new Date(item.created_at).toLocaleDateString()}
+</span>
 
 
-  </div>
+</div>
+
+))}
+
+
+{recentHistory.length === 0 && (
+
+<p className="text-gray-500">
+No recent content found.
+</p>
+
+)}
+
+</div>
 
 </div>{/* Subscription Card */}
 
@@ -319,8 +313,8 @@ export default function Dashboard() {
   </h2>
 
   <h3 className="text-4xl font-bold mt-3">
-    FREE
-  </h3>
+  {profile?.plan ?? "FREE"}
+</h3>
 
   <div className="mt-5 space-y-2">
 

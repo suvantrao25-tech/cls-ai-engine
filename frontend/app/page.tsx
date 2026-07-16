@@ -1,34 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Header from "../components/Header";
-import Templates from "../components/Templates";
 import UsageCounter from "../components/UsageCounter";
 import AIForm from "../components/AIForm";
+import { useState } from "react";
+
 
 export default function Home() {
 
-  const [prompt, setPrompt] = useState("");
   const [freeUses, setFreeUses] = useState(3);
-  const handleGenerate = () => {
-
-  if (freeUses <= 0) {
-    alert("Your free AI limit is over. Please create an account to continue.");
-    return false;
-  }
-
-  const remaining = freeUses - 1;
-
-  setFreeUses(remaining);
-
-  return true;
-
-};
 
 
   return (
 
     <main className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
+
 
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-4xl">
 
@@ -36,26 +22,48 @@ export default function Home() {
         <Header />
 
 
-        <Templates 
-          setPrompt={setPrompt}
-        />
+        <div className="mt-6">
+
+          <h1 className="text-4xl font-bold">
+            🚀 CLS AI Writer
+          </h1>
 
 
-        <AIForm 
-  prompt={prompt}
-  setPrompt={setPrompt}
-  onGenerate={handleGenerate}
-/>
+          <p className="text-gray-600 mt-2">
+            Generate blogs, SEO content, emails and more using AI.
+          </p>
 
-<p className="text-red-600">
-  Test Count: {freeUses}
-</p>
-        <UsageCounter 
-          freeUses={freeUses}
-        />
+
+        </div>
+
+
+
+        {/* AI Generator */}
+
+        <AIForm />
+
+
+
+        {/* Free Usage Counter */}
+
+        <div className="mt-6">
+
+          <p className="text-red-600">
+            Free Uses Remaining: {freeUses}
+          </p>
+
+
+          <UsageCounter 
+            freeUses={freeUses}
+          />
+
+
+        </div>
+
 
 
       </div>
+
 
     </main>
 

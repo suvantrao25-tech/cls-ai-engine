@@ -27,20 +27,21 @@ export default function Signup() {
     const { error: profileError } = await supabase
       .from("profiles")
       .insert({
-        id: data.user.id,
-        email: data.user.email,
-        name: "Creator",
-        plan: "FREE",
-        credits: 5000,
-        words_generated: 0,
-        blogs_generated: 0
-      });
+  id: data.user.id,
+  email: data.user.email,
+  full_name: "Creator",
+  plan: "FREE",
+  credits: 5000,
+  words_generated: 0,
+  blogs_generated: 0,
+});
 
 
     if (profileError) {
-      alert(profileError.message);
-      return;
-    }
+  console.log(profileError);
+  alert(profileError.message);
+  return;
+}
 
   }
 
