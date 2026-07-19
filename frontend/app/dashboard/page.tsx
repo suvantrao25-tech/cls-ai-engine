@@ -3,9 +3,12 @@
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function Dashboard() {
+
+  const router = useRouter();
 
   const [profile, setProfile] = useState<any>(null);
   const [recentHistory, setRecentHistory] = useState<any[]>([]);
@@ -14,9 +17,14 @@ export default function Dashboard() {
 
     const loadProfile = async () => {
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+  data: { user },
+} = await supabase.auth.getUser();
 
-      if (!user) return;
+if (!user) {
+  router.replace("/login");
+  return;
+}
 
       const { data, error } = await supabase
         .from("profiles")
@@ -50,7 +58,7 @@ setRecentHistory(historyData || []);
 
     loadProfile();
 
-  }, []);
+    }, [router]);
 
   return (
     <main className="flex bg-gray-100 min-h-screen">

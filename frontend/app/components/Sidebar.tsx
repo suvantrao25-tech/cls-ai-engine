@@ -1,4 +1,20 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
 export default function Sidebar() {
+
+  const router = useRouter();
+
+  const handleLogout = async () => {
+
+    await supabase.auth.signOut();
+
+    router.push("/login");
+
+  };
+
   return (
     <aside className="w-64 min-h-screen bg-gray-900 text-white p-6">
 
@@ -32,9 +48,16 @@ export default function Sidebar() {
           💳 Billing
         </button>
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          ⚙️ Settings
-        </button>
+        <button
+  onClick={handleLogout}
+  className="w-full text-left p-3 rounded-lg hover:bg-red-800"
+>
+  🚪 Logout
+</button>
+
+<button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
+  ⚙️ Settings
+</button>
 
       </nav>
 

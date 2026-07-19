@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function Signup() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
  const handleSignup = async () => {
 
@@ -46,7 +48,11 @@ export default function Signup() {
   }
 
 
-  alert("Account created successfully! Please check your email.");
+  alert(
+  "Account created successfully! Please check your email to verify your account before logging in."
+);
+
+router.push("/login");
 
 };
 

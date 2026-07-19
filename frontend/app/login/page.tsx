@@ -21,12 +21,12 @@ export default function Login() {
 
 
     if (error) {
-      alert(error.message);
-      return;
-    }
+  alert(error.message);
+  return;
+}
 
-
-    router.push("/dashboard");
+alert("Login successful!");
+router.push("/dashboard");
 
   };
 
