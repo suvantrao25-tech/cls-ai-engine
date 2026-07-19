@@ -2,6 +2,15 @@ const axios = require("axios");
 
 const generateResponse = async (text) => {
 
+  text = `${text}
+
+Create a complete SEO blog article.
+
+Minimum length: 1200 words.
+Use proper Markdown headings.
+Do not stop early.
+Finish the complete conclusion.`;
+
   let systemPrompt =
     "You are a professional AI writing assistant.";
 
@@ -15,16 +24,11 @@ Return ONLY Markdown formatted blog content.
 
 Rules:
 
-- First line must start with #
-The FIRST line MUST start with:
-
-# Blog Title
-
-Use Markdown headings only.
+The first line must be the article title in Markdown H1 format.
 
 Example:
 
-# Blog Title
+# Your Blog Title
 
 ## Introduction
 
@@ -72,9 +76,52 @@ Sources:
 Image Credits:
 Note:
 
-Output must contain ONLY the blog article.
+Write a complete long-form SEO article.
 
-End the article immediately after the Conclusion.
+STRICT LENGTH REQUIREMENT:
+
+Generate a long detailed article.
+
+Target length:
+1200+ words.
+
+IMPORTANT:
+Do not try to count words.
+Focus on writing a complete detailed article.
+
+Minimum sections:
+- Introduction
+- 5 Main Sections
+- Conclusion
+
+Each section must contain detailed paragraphs.
+
+Never finish after only a few paragraphs.
+
+Do not end until the article reaches minimum 1200 words.
+
+Required structure:
+
+# Title
+
+## Introduction
+(150-200 words)
+
+## Main Section
+(700-900 words)
+
+## Additional Sections
+(200-300 words)
+
+## Conclusion
+(150-200 words)
+
+IMPORTANT:
+Do not stop early.
+Do not summarize.
+Do not end before completing the Conclusion.
+
+Before finishing, check that the article is at least 1200 words.
 `;
 
 }
@@ -156,7 +203,9 @@ Generate:
           },
         ],
 
-        temperature: 0.7,
+        temperature: 0.5,
+        max_tokens: 8000,
+
       },
 
       {
@@ -168,66 +217,82 @@ Generate:
     );
 
   let result = response.data.choices[0].message.content;
+  console.log("AI LENGTH:", result.length);
+console.log("FINISH:", response.data.choices[0].finish_reason);
 // ===============================
 // Remove unwanted sections after conclusion
 // ===============================
 
-const cutSections = [
-  "Additional Tips",
-  "Additional Tips for Parents",
-  "Extra Tips",
-  "Bonus Tips",
-  "References",
-  "Sources",
-  "Image Credits"
-];
 
-
-cutSections.forEach((section)=>{
-
-  const index = result.toLowerCase()
-  .indexOf(section.toLowerCase());
-
-  if(index !== -1){
-
-    result = result.substring(0,index);
-
-  }
-
-});
 
 // ===============================
 // Remove unwanted ending sections
 // ===============================
 
-const removeAfter = [
-  "References",
-  "Image Credits",
-  "Sources",
-  "Citations"
-];
 
 
-removeAfter.forEach((section)=>{
 
-  const index = result.toLowerCase()
-  .indexOf(section.toLowerCase());
 
-  if(index !== -1){
-
-    result = result.substring(0,index);
-
-  }
-
-});
 
 
 // Remove research citations like (Author, 2025)
-result = result.replace(/\([^)]*\d{4}[^)]*\)/g,"");
 
 
 // Remove extra spaces
 result = result.trim();
+// ===============================
+// CLS Markdown Heading Formatter
+// ===============================
+
+result = result.replace(/^([^\n#]+)$/m, "# $1");
+
+result = result.replace(
+/^(Introduction|Main Section|Sub Section|Conclusion)$/gm,
+"## $1"
+);
+
+result = result.replace(
+/^Sub Section:\s*(.*)$/gm,
+"### $1"
+);
+
+// ===============================
+// Markdown Heading Fix
+// ===============================
+
+let blogLines = result.split("\n");
+
+blogLines = blogLines.map((line,index)=>{
+
+  let text = line.trim();
+
+  if(!text) return line;
+
+
+  if(index === 0){
+    return "# " + text.replace(/^#+\s*/,"");
+  }
+
+
+  const headings = [
+    "Introduction",
+    "Main Section",
+    "What is Artificial Intelligence?",
+    "Conclusion"
+  ];
+
+
+  if(headings.includes(text)){
+    return "## " + text;
+  }
+
+
+  return line;
+
+});
+
+
+result = blogLines.join("\n");
   // Remove unwanted AI SEO sections
 
 const unwantedSections = [
@@ -291,72 +356,7 @@ result=result.trim();
 
 
 
-let lines = result.split("\n");
 
-let titleAdded = false;
-
-lines = lines.map((line,index)=>{
-
-  let clean = line.trim();
-
-
-  if(!clean){
-    return line;
-  }
-  
-
-  // Already markdown
-  if(clean.startsWith("#")){
-    return line;
-  }
-
-
-  // Remove unwanted title label
-  if(clean.startsWith("Title:")){
-    clean = clean.replace("Title:","").trim();
-  }
-
-
-  // First line H1
-  if(!titleAdded){
-
-    titleAdded = true;
-
-    if(!clean.startsWith("#")){
-        return "# " + clean;
-    }
-
-}
-
-
-  // Detect headings
-  if(
-clean.length <= 60 &&
-clean.length >= 5 &&
-!clean.endsWith(".") &&
-!clean.includes(":") &&
-!clean.startsWith("-") &&
-(
-clean.toLowerCase().includes("introduction") ||
-clean.toLowerCase().includes("conclusion") ||
-clean.toLowerCase().includes("benefits") ||
-clean.toLowerCase().includes("tips") ||
-clean.toLowerCase().includes("guide") ||
-clean.toLowerCase().includes("importance") ||
-clean.toLowerCase().includes("how") 
-)
-){
-
-return "## " + clean;
-
-}
-
-
-  return line;
-
-});
-// Convert array back to text
-result = lines.join("\n");
 
 
 
@@ -373,6 +373,12 @@ result = result.replace(/^Title:\s*/i, "# ");
 
 // Convert Introduction heading
 result = result.replace(/^Introduction$/im, "## Introduction");
+
+// Remove accidental H1 from first paragraph
+result = result.replace(
+  /(## Introduction)\n#\s+/i,
+  "$1\n\n"
+);
 
 // Convert Conclusion heading
 result = result.replace(/^Conclusion$/im, "## Conclusion");
