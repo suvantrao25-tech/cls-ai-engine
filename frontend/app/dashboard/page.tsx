@@ -102,15 +102,20 @@ setRecentHistory(historyData || []);
   </div>
 
 
-  <div className="bg-white p-6 rounded-xl shadow">
-    <h3 className="text-gray-500">
-      💾 Saved Content
-    </h3>
+  <div
+onClick={() => router.push("/saved")}
+className="bg-white p-6 rounded-xl shadow cursor-pointer hover:shadow-lg"
+>
 
-    <p className="text-3xl font-bold mt-3">
-  0
-</p>
-  </div>
+  <h3 className="text-gray-500">
+    💾 Saved Content
+  </h3>
+
+  <p className="text-3xl font-bold mt-3">
+    View →
+  </p>
+
+</div>
 
 
   <div className="bg-white p-6 rounded-xl shadow">
@@ -180,9 +185,14 @@ setRecentHistory(historyData || []);
         Generate SEO optimized blog articles.
       </p>
 
-      <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Open
-      </button>
+      <button
+  onClick={() =>
+    router.push("/ai-writer?template=Blog%20Writer")
+  }
+  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+  Open
+</button>
 
     </div>
 
@@ -198,9 +208,14 @@ setRecentHistory(historyData || []);
         Create SEO content with keywords.
       </p>
 
-      <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Open
-      </button>
+      <button
+  onClick={() =>
+    router.push("/ai-writer?template=SEO%20Writer")
+  }
+  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+  Open
+</button>
 
     </div>
 
@@ -216,9 +231,14 @@ setRecentHistory(historyData || []);
         Write professional emails instantly.
       </p>
 
-      <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Open
-      </button>
+      <button
+  onClick={() =>
+    router.push("/ai-writer?template=Email%20Writer")
+  }
+  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+  Open
+</button>
 
     </div>
 
@@ -234,9 +254,14 @@ setRecentHistory(historyData || []);
         Create engaging social posts.
       </p>
 
-      <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Open
-      </button>
+      <button
+  onClick={() =>
+    router.push("/ai-writer?template=Social%20Media%20Post")
+  }
+  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+  Open
+</button>
 
     </div>
 
@@ -252,9 +277,14 @@ setRecentHistory(historyData || []);
         Generate high converting product copy.
       </p>
 
-      <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">
-        Open
-      </button>
+      <button
+  onClick={() =>
+    router.push("/ai-writer?template=Product%20Description")
+  }
+  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+  Open
+</button>
 
     </div>
 

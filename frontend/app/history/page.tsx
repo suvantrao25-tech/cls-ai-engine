@@ -41,39 +41,42 @@ export default function HistoryPage() {
 
   useEffect(() => {
 
-  
-    const loadHistory = async () => {
+  const loadHistory = async () => {
 
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
-
-
-      if (!user) return;
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
 
 
-      const { data, error } = await supabase
-        .from("history")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+    if (!user) return;
 
 
-      if (error) {
-        console.log(error);
-        return;
-      }
+    const { data, error } = await supabase
+      .from("history")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
 
-      setHistory(data || []);
+    console.log("User:", user);
+    console.log("History Data:", data);
+    console.log("History Error:", error);
 
-    };
+
+    if (error) {
+      console.log(error);
+      return;
+    }
 
 
-    loadHistory();
+    setHistory(data || []);
 
-  }, []);
+  };
 
+
+  loadHistory();
+
+}, []);
 
 
   return (
@@ -110,8 +113,8 @@ export default function HistoryPage() {
   </h3>
 
   <p className="mt-2 text-gray-700 whitespace-pre-wrap line-clamp-5">
-    {item.response}
-  </p>
+  {item.response}
+</p>
 
 </div>
 
@@ -120,7 +123,7 @@ export default function HistoryPage() {
               {new Date(item.created_at).toLocaleString()}
             </p>
             <p className="text-sm text-gray-500 mt-2">
-  📝 Words: {item.response?.split(" ").length || 0}
+  📝 Words: {item.words || 0}
 </p>
             <div className="mt-4 flex gap-3">
 

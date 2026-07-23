@@ -24,35 +24,14 @@ export default function Signup() {
   }
 
 
-  if (data.user) {
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-  id: data.user.id,
-  email: data.user.email,
-  full_name: "Creator",
-  plan: "FREE",
-  credits: 5000,
-  words_generated: 0,
-  blogs_generated: 0,
-});
-
-
-    if (profileError) {
-  console.log(profileError);
-  alert(profileError.message);
-  return;
-}
-
-  }
-
+  
 
   alert(
-  "Account created successfully! Please check your email to verify your account before logging in."
-);
+    "Account created successfully! Please check your email to verify your account before logging in."
+  );
 
-router.push("/login");
+
+  router.push("/login");
 
 };
 

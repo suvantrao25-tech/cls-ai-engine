@@ -1,10 +1,11 @@
 "use client";
 
 import Header from "../components/Header";
-import UsageCounter from "../components/UsageCounter";
-import AIForm from "../components/AIForm";
+import UsageCounter from "../../components/UsageCounter";
+import AIForm from "../../components/AIForm";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useSearchParams } from "next/navigation";
 
 
 export default function Home() {
@@ -12,6 +13,11 @@ export default function Home() {
   const [freeUses, setFreeUses] = useState(3);
 
   const [user, setUser] = useState<any>(null);
+
+
+  const searchParams = useSearchParams();
+
+  const selectedTemplate = searchParams.get("template");
 
 
   useEffect(() => {
@@ -76,6 +82,7 @@ export default function Home() {
         <AIForm
   freeUses={freeUses}
   setFreeUses={setFreeUses}
+  selectedTemplate={selectedTemplate}
 />
 
 

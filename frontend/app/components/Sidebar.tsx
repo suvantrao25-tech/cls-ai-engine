@@ -24,29 +24,47 @@ export default function Sidebar() {
 
       <nav className="flex flex-col gap-4">
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          🏠 Dashboard
-        </button>
+        <button
+  onClick={() => router.push("/dashboard")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
+  🏠 Dashboard
+</button>
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          ✍️ AI Writer
-        </button>
+        <button
+  onClick={() => router.push("/ai-writer")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
+  ✍️ AI Writer
+</button>
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          📄 History
-        </button>
+        <button
+  onClick={() => router.push("/history")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
+  📄 History
+</button>
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          📚 Templates
-        </button>
+        <button
+  onClick={() => router.push("/templates")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
+  📚 Templates
+</button>
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          💾 Saved Content
-        </button>
+        <button
+  onClick={() => router.push("/saved")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
+  💾 Saved Content
+</button>
 
-        <button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
-          💳 Billing
-        </button>
+        <button
+  onClick={() => router.push("/billing")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
+  💳 Billing
+</button>
 
         <button
   onClick={handleLogout}
@@ -55,7 +73,10 @@ export default function Sidebar() {
   🚪 Logout
 </button>
 
-<button className="w-full text-left p-3 rounded-lg hover:bg-gray-800">
+<button
+  onClick={() => router.push("/settings")}
+  className="w-full text-left p-3 rounded-lg hover:bg-gray-800"
+>
   ⚙️ Settings
 </button>
 

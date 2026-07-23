@@ -1,16 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReactMarkdown from "react-markdown";
 
-export default function AIForm() {
+export default function AIForm({
+  freeUses,
+  setFreeUses,
+  selectedTemplate
+}: any) {
 
+  const router = useRouter();
   const [prompt, setPrompt] = useState("");
-  const [template, setTemplate] = useState("Blog Writer");
+  const [template, setTemplate] = useState(
+  selectedTemplate || "Blog Writer"
+);
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+  console.log("Selected Template:", selectedTemplate);
+
+  if (selectedTemplate) {
+    setTemplate(selectedTemplate);
+  }
+}, [selectedTemplate]);
 
 
   useEffect(() => {
@@ -33,10 +48,25 @@ export default function AIForm() {
 
   const generateAI = async () => {
 
+  const { data: authData } = await supabase.auth.getSession();
+
+  console.log("SESSION:", authData.session);
+
+  const currentUser = authData.session?.user;
+
+  console.log("CURRENT USER:", currentUser);
+
     if (!prompt.trim()) {
       alert("Enter prompt");
       return;
     }
+    if (!currentUser && freeUses <= 0) {
+
+  setResponse("LIMIT_REACHED");
+
+  return;
+
+}
 
 
     setLoading(true);
@@ -71,61 +101,72 @@ export default function AIForm() {
 
 
       setResponse(aiResponse);
+      if (!user) {
+
+  console.log("User:", user);
+  console.log("Free Uses Before:", freeUses);
+
+  const newUses = freeUses - 1;
+
+  setFreeUses(newUses);
+  console.log("State Updated:", newUses);
+
+  localStorage.setItem(
+    "cls_ai_free_uses",
+    newUses.toString()
+  );
+
+  console.log("Free Uses After:", newUses);
+
+}
 
 
 
-      if(user){
+      if (currentUser) {
 
-        await supabase
-        .from("history")
-        .insert({
+  const words = aiResponse.trim().split(/\s+/).length;
 
-          user_id:user.id,
-          template:template,
-          prompt:prompt,
-          response:aiResponse
+  const insertData = {
+    user_id: currentUser.id,
+    template,
+    prompt,
+    response: aiResponse,
+    words,
+  };
 
-        });
+  console.log("INSERT DATA:", insertData);
 
+  const { data: historyData, error: historyError } =
+    await supabase
+      .from("history")
+      .insert(insertData)
+      .select();
 
-        const words =
-        aiResponse.trim()
-        .split(/\s+/)
-        .length;
+  console.log("HISTORY DATA:", historyData);
+  console.log("HISTORY ERROR:", historyError);
 
+  if (!historyError) {
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .single();
 
-        const {data:profile}=await supabase
+    if (profile) {
+      await supabase
         .from("profiles")
-        .select("*")
-        .eq("id",user.id)
-        .single();
+        .update({
+          words_generated: profile.words_generated + words,
+          blogs_generated: profile.blogs_generated + 1,
+          credits: Math.max(profile.credits - words, 0),
+        })
+        .eq("id", currentUser.id);
+    }
 
+  }
 
-
-        if(profile){
-
-          await supabase
-          .from("profiles")
-          .update({
-
-            words_generated:
-            profile.words_generated + words,
-
-            blogs_generated:
-            profile.blogs_generated + 1,
-
-            credits:
-            profile.credits - words
-
-          })
-          .eq("id",user.id);
-
-        }
-
-
-      }
-
+}
 
     }
     catch(error){
@@ -243,27 +284,82 @@ return (
       🤖 AI Response
     </h2>
 
-    {response && (
-      <span className="text-sm text-gray-500">
-        📝 Words: {response.trim().split(/\s+/).length}
-      </span>
-    )}
+    {response && response !== "LIMIT_REACHED" && (
+  <span className="text-sm text-gray-500">
+    📝 Words: {response.trim().split(/\s+/).length}
+  </span>
+)}
 
   </div>
 
   <div className="min-h-[250px] text-gray-700 leading-8">
 
-  {response ? (
+  {response === "LIMIT_REACHED" ? (
 
-    <div className="prose max-w-none">
+<div className="bg-blue-50 border rounded-2xl p-6 text-center">
 
-  <ReactMarkdown>
-    {response}
-  </ReactMarkdown>
+
+<h2 className="text-2xl font-bold">
+🚀 Continue Creating with CLS AI
+</h2>
+
+
+<p className="mt-3 text-gray-600">
+Your free 3 AI generations are completed.
+</p>
+
+
+<p className="mt-4 font-semibold">
+Create your free account and get:
+</p>
+
+
+<div className="mt-4 text-left max-w-sm mx-auto">
+
+
+<p>✓ 5000 AI Credits</p>
+
+<p>✓ Save AI History</p>
+
+<p>✓ Personal Dashboard</p>
+
+<p>✓ More AI Templates</p>
+
 
 </div>
 
-  ) : (
+
+
+<button
+
+onClick={() => router.push("/signup")}
+
+className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl"
+
+>
+
+Create Free Account
+
+</button>
+
+
+</div>
+
+
+
+) : response ? (
+
+
+<div className="prose max-w-none">
+
+<ReactMarkdown>
+{response}
+</ReactMarkdown>
+
+</div>
+
+
+) : (
 
     <p className="text-gray-400">
       Your AI-generated content will appear here...
@@ -273,9 +369,9 @@ return (
 
 </div>
 
-  {response && (
+  {response && response !== "LIMIT_REACHED" && (
 
-    <div className="flex gap-3 mt-6">
+<div className="flex gap-3 mt-6">
 
       <button
         onClick={() => navigator.clipboard.writeText(response)}
@@ -283,6 +379,43 @@ return (
       >
         📋 Copy
       </button>
+      <button
+  onClick={async () => {
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+
+    if (!user) {
+      alert("Please login to save content");
+      return;
+    }
+
+
+    const { error } = await supabase
+      .from("saved_content")
+      .insert({
+        user_id: user.id,
+        template,
+        prompt,
+        response
+      });
+
+
+    if (error) {
+      console.log(error);
+      alert("Save failed");
+    } 
+    else {
+      alert("Content saved successfully ✅");
+    }
+
+  }}
+  className="px-5 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
+>
+  💾 Save
+</button>
 
       <button
         onClick={() => {
