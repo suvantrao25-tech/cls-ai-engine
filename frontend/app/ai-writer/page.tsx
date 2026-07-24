@@ -3,17 +3,13 @@
 import Header from "../components/Header";
 import UsageCounter from "../../components/UsageCounter";
 import AIForm from "../../components/AIForm";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 
-export default function Home() {
+function AIWriterContent() {
 
   const [freeUses, setFreeUses] = useState(3);
-
-  const [user, setUser] = useState<any>(null);
-
 
   const searchParams = useSearchParams();
 
@@ -26,6 +22,7 @@ export default function Home() {
 
     const savedDate = localStorage.getItem("cls_ai_date");
     const savedUses = localStorage.getItem("cls_ai_free_uses");
+
 
     if (savedDate !== today) {
 
@@ -44,14 +41,8 @@ export default function Home() {
 
 
 
-  useEffect(() => {
-
-    console.log("Home freeUses:", freeUses);
-
-  }, [freeUses]);
-
-
   return (
+
     <main className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
 
 
@@ -72,46 +63,59 @@ export default function Home() {
             Generate blogs, SEO content, emails and more using AI.
           </p>
 
-
         </div>
 
 
 
-        {/* AI Generator */}
-
         <AIForm
-  freeUses={freeUses}
-  setFreeUses={setFreeUses}
-  selectedTemplate={selectedTemplate}
-/>
+          freeUses={freeUses}
+          setFreeUses={setFreeUses}
+          selectedTemplate={selectedTemplate}
+        />
 
 
-
-        {/* Free Usage Counter */}
 
         <div className="mt-6">
 
           <p className="text-red-600">
             Free Uses Remaining: {freeUses}
           </p>
-          <p className="text-blue-600">
-  Debug Value: {freeUses}
-</p>
 
 
-          <UsageCounter 
+          <UsageCounter
             freeUses={freeUses}
           />
 
-
         </div>
-
 
 
       </div>
 
 
     </main>
+
+  );
+
+}
+
+
+
+export default function Home() {
+
+
+  return (
+
+    <Suspense
+      fallback={
+        <div className="p-10 text-center">
+          Loading AI Writer...
+        </div>
+      }
+    >
+
+      <AIWriterContent />
+
+    </Suspense>
 
   );
 
