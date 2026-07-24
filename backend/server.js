@@ -9,9 +9,11 @@ app.use(express.json());
 
 // IMPORTANT: correct import
 const aiRoutes = require("./routes/aiRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 // must be function (router)
 app.use("/api/ai", aiRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.get("/", (req, res) => {
   res.send("CLS AI Engine Running 🚀");

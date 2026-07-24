@@ -2,6 +2,7 @@
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import UpgradeButton from "../../components/UpgradeButton";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -351,8 +352,8 @@ No recent content found.
   </h2>
 
   <h3 className="text-4xl font-bold mt-3">
-  {profile?.plan ?? "FREE"}
-</h3>
+    {profile?.plan ?? "FREE"}
+  </h3>
 
   <div className="mt-5 space-y-2">
 
@@ -370,17 +371,12 @@ No recent content found.
 
   </div>
 
-
-  <button
-  className="mt-6 bg-white text-blue-600 px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-50 hover:scale-105 transition"
->
-  Upgrade to Pro →
-</button>
-
+  <UpgradeButton />
 
 </div>
-      </section>
 
-    </main>
-  );
+</section>
+
+</main>
+);
 }
