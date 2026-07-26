@@ -8,7 +8,8 @@ import ReactMarkdown from "react-markdown";
 export default function AIForm({
   freeUses,
   setFreeUses,
-  selectedTemplate
+  selectedTemplate,
+  refreshCredits
 }: any) {
 
   const router = useRouter();
@@ -101,15 +102,14 @@ export default function AIForm({
 
 
       setResponse(aiResponse);
-      if (!user) {
+     if (!currentUser) {
 
-  console.log("User:", user);
+  console.log("Guest User");
   console.log("Free Uses Before:", freeUses);
 
   const newUses = freeUses - 1;
 
   setFreeUses(newUses);
-  console.log("State Updated:", newUses);
 
   localStorage.setItem(
     "cls_ai_free_uses",
@@ -121,9 +121,7 @@ export default function AIForm({
 }
 
 
-
-      if (currentUser) {
-
+if (currentUser) {
   const words = aiResponse.trim().split(/\s+/).length;
 
   const insertData = {
@@ -163,6 +161,9 @@ export default function AIForm({
         })
         .eq("id", currentUser.id);
     }
+    if (refreshCredits) {
+  refreshCredits();
+}
 
   }
 

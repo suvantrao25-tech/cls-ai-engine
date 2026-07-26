@@ -12,54 +12,97 @@ export default function Dashboard() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<any>(null);
-  const [recentHistory, setRecentHistory] = useState<any[]>([]);
+const [recentHistory, setRecentHistory] = useState<any[]>([]);
 
-  useEffect(() => {
 
-    const loadProfile = async () => {
+const loadProfile = async () => {
 
-      const {
-  data: { user },
-} = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-if (!user) {
-  router.replace("/login");
-  return;
-}
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+  if (!user) {
+    router.replace("/login");
+    return;
+  }
 
-      if (error) {
-        console.log(error.message);
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+
+  if (error) {
+
+    console.log(error.message);
+
+
+    if (error.code === "PGRST116") {
+
+      const { data: newProfile, error: insertError } =
+        await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: "Creator",
+            plan: "FREE",
+            credits: 5000,
+            words_generated: 0,
+            blogs_generated: 0,
+            subscription_status: "active",
+            subscription_plan: "FREE"
+          })
+          .select()
+          .single();
+
+
+      if(insertError){
+        console.log(insertError.message);
         return;
       }
 
-      setProfile(data);
-      const { data: historyData, error: historyError } = await supabase
-  .from("history")
-  .select("*")
-  .eq("user_id", user.id)
-  .order("created_at", { ascending: false })
-  .limit(3);
+
+      setProfile(newProfile);
+      return;
+
+    }
 
 
-if (historyError) {
-  console.log(historyError);
-  return;
-}
+    return;
+  }
 
 
-setRecentHistory(historyData || []);
+  // Existing profile
+  setProfile(data);
 
-    };
 
-    loadProfile();
+  const { data: historyData, error: historyError } = await supabase
+    .from("history")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending:false })
+    .limit(3);
 
-    }, [router]);
+
+  if(historyError){
+    console.log(historyError.message);
+    return;
+  }
+
+
+  setRecentHistory(historyData || []);
+
+};
+
+  useEffect(() => {
+
+  loadProfile();
+
+}, []);
 
   return (
     <main className="flex bg-gray-100 min-h-screen">
@@ -149,10 +192,12 @@ className="bg-white p-6 rounded-xl shadow cursor-pointer hover:shadow-lg"
   <div className="w-full bg-gray-200 rounded-full h-4 mt-5">
 
     <div
-      className="bg-blue-600 h-4 rounded-full"
-      style={{ width: "90%" }}
-    >
-    </div>
+  className="bg-blue-600 h-4 rounded-full"
+  style={{
+    width: `${profile ? (profile.credits / 5000) * 100 : 100}%`
+  }}
+>
+</div>
 
   </div>
 

@@ -14,22 +14,56 @@ export default function Login() {
 
   const handleLogin = async () => {
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
 
-    if (error) {
-  alert(error.message);
-  return;
-}
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
-alert("Login successful!");
-router.push("/dashboard");
 
-  };
+  if (data.user) {
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
+
+
+    if (!profile) {
+
+      await supabase
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          full_name: "Creator",
+          plan: "FREE",
+          credits: 5000,
+          words_generated: 0,
+          blogs_generated: 0,
+          subscription_status: "active",
+          subscription_plan: "FREE",
+        });
+
+    }
+
+  }
+
+
+  alert("Login successful!");
+
+  router.push("/dashboard");
+
+};
+
+
+    
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">

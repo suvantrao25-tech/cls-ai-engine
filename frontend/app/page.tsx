@@ -16,10 +16,40 @@ export default function Home() {
 
   useEffect(() => {
 
+  const loadUsage = async () => {
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+
+    setUser(user);
+
+
+    // Logged-in user ke liye database credits
+    if (user) {
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("credits")
+        .eq("id", user.id)
+        .single();
+
+
+      if (!error && profile) {
+        setFreeUses(profile.credits);
+      }
+
+      return;
+    }
+
+
+    // Guest user ke liye localStorage
     const today = new Date().toDateString();
 
     const savedDate = localStorage.getItem("cls_ai_date");
     const savedUses = localStorage.getItem("cls_ai_free_uses");
+
 
     if (savedDate !== today) {
 
@@ -34,7 +64,13 @@ export default function Home() {
 
     }
 
-  }, []);
+  };
+
+
+  loadUsage();
+
+
+}, []);
 
 
 
@@ -84,9 +120,15 @@ export default function Home() {
 
         <div className="mt-6">
 
-          <p className="text-red-600">
-            Free Uses Remaining: {freeUses}
-          </p>
+          {user ? (
+  <p className="text-green-600 font-semibold">
+    AI Credits: {freeUses}
+  </p>
+) : (
+  <p className="text-red-600 font-semibold">
+    Free Uses Remaining: {freeUses}
+  </p>
+)}
           <p className="text-blue-600">
   Debug Value: {freeUses}
 </p>

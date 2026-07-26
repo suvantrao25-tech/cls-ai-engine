@@ -12,43 +12,19 @@ export default function Signup() {
 
  const handleSignup = async () => {
 
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
   });
 
-
-  if (data.user) {
-
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .insert({
-      id: data.user.id,
-      email: email,
-      full_name: "Creator",
-      plan: "FREE",
-      credits: 5000,
-      words_generated: 0,
-      blogs_generated: 0,
-      subscription_status: "active",
-      subscription_plan: "FREE",
-    });
-
-
-  if (profileError) {
-    alert(profileError.message);
+  if (error) {
+    alert(error.message);
     return;
   }
-
-}
-
-
-  
 
   alert(
     "Account created successfully! Please check your email to verify your account before logging in."
   );
-
 
   router.push("/login");
 
