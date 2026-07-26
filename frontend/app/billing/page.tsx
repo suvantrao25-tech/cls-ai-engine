@@ -24,8 +24,8 @@ export default function BillingPage() {
 
 
     {
-      name:"CREATOR PRO",
-      price:"₹499",
+ name:"CREATOR PRO",
+ price:"₹299",
       words:"50,000 AI Words",
       popular:true,
       features:[
@@ -38,8 +38,8 @@ export default function BillingPage() {
 
 
     {
-      name:"BUSINESS",
-      price:"₹1499",
+ name:"BUSINESS",
+ price:"Coming Soon",
       words:"Unlimited AI Words",
       features:[
         "Everything in Pro",
@@ -108,6 +108,38 @@ Your active CLS AI plan
 5,000 Words
 </p>
 
+
+</div>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+<div className="bg-gray-50 p-4 rounded-xl">
+<p className="text-gray-500">
+Status
+</p>
+<p className="font-bold text-green-600">
+Active
+</p>
+</div>
+
+
+<div className="bg-gray-50 p-4 rounded-xl">
+<p className="text-gray-500">
+Billing Cycle
+</p>
+<p className="font-bold">
+Monthly
+</p>
+</div>
+
+
+<div className="bg-gray-50 p-4 rounded-xl">
+<p className="text-gray-500">
+Renewal
+</p>
+<p className="font-bold">
+--
+</p>
+</div>
 
 </div>
 
