@@ -112,7 +112,7 @@ console.log("AIForm freeUses:", freeUses);
   console.log("Guest User");
   console.log("Free Uses Before:", freeUses);
 
-  setFreeUses((prev) => {
+  setFreeUses((prev: number) => {
 
     const newUses = prev - 1;
 
