@@ -8,43 +8,58 @@ import { supabase } from "@/lib/supabase";
 
 
 export default function Home() {
+  console.log("===== PAGE.TSX RUNNING =====");
 
   const [freeUses, setFreeUses] = useState(3);
 
   const [user, setUser] = useState<any>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
 
   useEffect(() => {
 
   const loadUsage = async () => {
 
+    console.log("LOAD USAGE START");
+
     const {
-      data: { user }
-    } = await supabase.auth.getUser();
+      data: { session }
+    } = await supabase.auth.getSession();
 
 
-    setUser(user);
+    const currentUser = session?.user;
 
 
-    // Logged-in user ke liye database credits
-    if (user) {
+    console.log("AI WRITER USER:", currentUser);
+
+
+    setUser(currentUser);
+
+
+    if (currentUser) {
 
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("credits")
-        .eq("id", user.id)
+        .eq("id", currentUser.id)
         .single();
 
 
-      if (!error && profile) {
+      console.log("AI WRITER PROFILE:", profile);
+      console.log("PROFILE ERROR:", error);
+
+
+      if (profile) {
         setFreeUses(profile.credits);
       }
 
+
+      setLoadingUser(false);
       return;
     }
 
 
-    // Guest user ke liye localStorage
+    // Guest logic
     const today = new Date().toDateString();
 
     const savedDate = localStorage.getItem("cls_ai_date");
@@ -64,10 +79,36 @@ export default function Home() {
 
     }
 
+
+    setLoadingUser(false);
+
   };
 
 
   loadUsage();
+
+
+  const {
+    data: authListener
+  } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+
+      const currentUser = session?.user || null;
+
+      console.log(
+        "AUTH CHANGE USER:",
+        currentUser
+      );
+
+      setUser(currentUser);
+
+    }
+  );
+
+
+  return () => {
+    authListener.subscription.unsubscribe();
+  };
 
 
 }, []);
@@ -76,13 +117,23 @@ export default function Home() {
 
   useEffect(() => {
 
-    console.log("Home freeUses:", freeUses);
+  console.log("Home freeUses:", freeUses);
 
-  }, [freeUses]);
+}, [freeUses]);
 
 
+// YAHAN ADD KARO 👇
+if (loadingUser) {
   return (
-    <main className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
+    <div className="min-h-screen flex items-center justify-center">
+      Loading CLS AI...
+    </div>
+  );
+}
+
+
+return (
+  <main className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
 
 
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-4xl">
@@ -134,9 +185,11 @@ export default function Home() {
 </p>
 
 
-          <UsageCounter 
-            freeUses={freeUses}
-          />
+          {!user && (
+  <UsageCounter 
+    freeUses={freeUses}
+  />
+)}
 
 
         </div>

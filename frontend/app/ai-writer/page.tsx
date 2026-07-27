@@ -5,11 +5,13 @@ import UsageCounter from "../../components/UsageCounter";
 import AIForm from "../../components/AIForm";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 
 function AIWriterContent() {
 
   const [freeUses, setFreeUses] = useState(3);
+  const [user, setUser] = useState<any>(null);
 
   const searchParams = useSearchParams();
 
@@ -18,27 +20,53 @@ function AIWriterContent() {
 
   useEffect(() => {
 
-    const today = new Date().toDateString();
+  const loadUsage = async () => {
 
-    const savedDate = localStorage.getItem("cls_ai_date");
-    const savedUses = localStorage.getItem("cls_ai_free_uses");
+    console.log("AI WRITER PAGE RUNNING");
+
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
 
 
-    if (savedDate !== today) {
+    const currentUser = session?.user;
 
-      localStorage.setItem("cls_ai_date", today);
-      localStorage.setItem("cls_ai_free_uses", "3");
 
-      setFreeUses(3);
+    console.log(
+      "AI WRITER USER:",
+      currentUser
+    );
 
-    } else {
 
-      setFreeUses(Number(savedUses || 3));
+    setUser(currentUser);
 
+
+    if (currentUser) {
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("credits")
+        .eq("id", currentUser.id)
+        .single();
+
+
+      console.log(
+        "AI WRITER PROFILE:",
+        profile
+      );
+
+      if (profile) {
+        setFreeUses(profile.credits);
+      }
+
+      return;
     }
 
-  }, []);
+  };
 
+  loadUsage();
+
+}, []);
 
 
   return (
@@ -75,21 +103,32 @@ function AIWriterContent() {
 
 
 
-        <div className="mt-6">
+                <div className="mt-6">
 
-          <p className="text-red-600">
-            Free Uses Remaining: {freeUses}
-          </p>
+          {user ? (
 
+            <p className="text-green-600">
+              AI Credits: {freeUses}
+            </p>
 
-          <UsageCounter
-            freeUses={freeUses}
-          />
+          ) : (
+
+            <>
+              <p className="text-red-600">
+                Free Uses Remaining: {freeUses}
+              </p>
+
+              <UsageCounter
+                freeUses={freeUses}
+              />
+            </>
+
+          )}
 
         </div>
 
 
-      </div>
+      </div>   {/* white card close */}
 
 
     </main>

@@ -11,6 +11,11 @@ export default function AIForm({
   selectedTemplate,
   refreshCredits
 }: any) {
+  console.log("========== AIForm ==========");
+console.log("PROP freeUses =", freeUses);
+console.log("PROP setFreeUses =", typeof setFreeUses);
+  console.log("AIForm Render");
+console.log("AIForm freeUses:", freeUses);
 
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
@@ -107,16 +112,20 @@ export default function AIForm({
   console.log("Guest User");
   console.log("Free Uses Before:", freeUses);
 
-  const newUses = freeUses - 1;
+  setFreeUses((prev) => {
 
-  setFreeUses(newUses);
+    const newUses = prev - 1;
 
-  localStorage.setItem(
-    "cls_ai_free_uses",
-    newUses.toString()
-  );
+    localStorage.setItem(
+      "cls_ai_free_uses",
+      newUses.toString()
+    );
 
-  console.log("Free Uses After:", newUses);
+    console.log("Updated Free Uses:", newUses);
+
+    return newUses;
+
+  });
 
 }
 
