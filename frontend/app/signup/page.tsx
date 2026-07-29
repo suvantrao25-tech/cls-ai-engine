@@ -1,41 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function Signup() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
 
- const handleSignup = async () => {
+  const handleSignup = async () => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo:
+          "https://app.creatorlaunchspace.com/auth/confirmed",
+      },
+    });
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  alert(
-    "Account created successfully! Please check your email to verify your account before logging in."
-  );
-
-  router.push("/login");
-
-};
-
+    alert(
+      "Account created successfully! Please check your email to verify your account."
+    );
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
-
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-
         <h1 className="text-3xl font-bold text-center">
           🚀 Create CLS AI Account
         </h1>
@@ -44,24 +38,21 @@ export default function Signup() {
           Start creating AI content today.
         </p>
 
-
         <input
           type="email"
           placeholder="Enter your email"
           className="w-full mt-6 p-3 border rounded-lg"
           value={email}
-          onChange={(e)=>setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
         />
-
 
         <input
           type="password"
           placeholder="Create password"
           className="w-full mt-4 p-3 border rounded-lg"
           value={password}
-          onChange={(e)=>setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
         />
-
 
         <button
           onClick={handleSignup}
@@ -69,10 +60,7 @@ export default function Signup() {
         >
           Create Account
         </button>
-
-
       </div>
-
     </main>
   );
 }
