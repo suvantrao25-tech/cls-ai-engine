@@ -11,9 +11,17 @@ export default function ConfirmedPage() {
 
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg text-center">
 
-        <h1 className="text-3xl font-bold mb-4">
-          🎉 Email Verified Successfully!
-        </h1>
+        <div className="flex flex-col items-center">
+  <img
+    src="/cls-ai-logo.png"
+    alt="CLS AI"
+    className="w-24 h-24 object-contain mb-4"
+  />
+
+  <h1 className="text-3xl font-bold mb-4">
+    🎉 Email Verified Successfully!
+  </h1>
+</div>
 
 
         <p className="text-gray-600 mb-6">

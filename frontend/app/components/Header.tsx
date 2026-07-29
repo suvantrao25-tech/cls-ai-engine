@@ -2,14 +2,24 @@ export default function Header() {
   return (
     <div className="bg-white p-5 rounded-xl shadow flex justify-between items-center">
 
-      <div>
-        <h2 className="text-3xl font-bold">
-          Dashboard
-        </h2>
+      <div className="flex items-center gap-4">
 
-        <p className="text-gray-500">
-          Welcome back to CLS AI
-        </p>
+        <img
+          src="/cls-ai-logo.png"
+          alt="CLS AI"
+          className="w-14 h-14 object-contain"
+        />
+
+        <div>
+          <h2 className="text-3xl font-bold">
+            Dashboard
+          </h2>
+
+          <p className="text-gray-500">
+            Welcome back to CLS AI
+          </p>
+        </div>
+
       </div>
 
       <div className="flex items-center gap-5">

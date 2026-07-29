@@ -82,9 +82,17 @@ function AIWriterContent() {
 
         <div className="mt-6">
 
-          <h1 className="text-4xl font-bold">
-            🚀 CLS AI Writer
-          </h1>
+          <div className="flex items-center gap-3">
+  <img
+    src="/cls-ai-logo.png"
+    alt="CLS AI Logo"
+    className="w-12 h-12 object-contain"
+  />
+
+  <h1 className="text-4xl font-bold">
+    CLS AI Writer
+  </h1>
+</div>
 
 
           <p className="text-gray-600 mt-2">
