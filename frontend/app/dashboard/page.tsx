@@ -115,12 +115,22 @@ const loadProfile = async () => {
 
         <div className="mt-8">
           <h1 className="text-4xl font-bold">
-            Welcome Back 👋
-          </h1>
+  Welcome Back 👋
+</h1>
 
-          <p className="text-gray-600 mt-2">
-            Start creating amazing AI content with CLS AI.
-          </p>
+<p className="text-gray-600 mt-2">
+  Start creating amazing AI content with CLS AI.
+</p>
+
+<div className="mt-4 bg-white rounded-xl shadow p-4 border">
+  <p className="font-semibold text-gray-800">
+    👤 {profile?.full_name || "Creator"}
+  </p>
+
+  <p className="text-gray-500 text-sm mt-1">
+    📧 {profile?.email}
+  </p>
+</div>
         </div>
 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
 
