@@ -20,7 +20,7 @@ export default function ForgotPassword() {
 
     const { data, error } =
       await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: "http://localhost:3000/reset-password",
+        redirectTo: "https://app.creatorlaunchspace.com/reset-password",
       });
 
     console.log("Reset data:", data);
