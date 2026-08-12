@@ -78,6 +78,52 @@ const loadProfile = async () => {
 
   // Existing profile
   setProfile(data);
+  // Check Creator Pro subscription status
+try {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session?.access_token) {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/payment/check-subscription`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+
+    const subscriptionData = await response.json();
+
+    console.log(
+      "SUBSCRIPTION CHECK:",
+      subscriptionData
+    );
+
+    if (response.ok && subscriptionData.success) {
+      // Backend says account returned to FREE
+      if (subscriptionData.status === "free") {
+        const { data: updatedProfile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (updatedProfile) {
+          setProfile(updatedProfile);
+        }
+      }
+    }
+  }
+} catch (subscriptionError) {
+  console.error(
+    "SUBSCRIPTION CHECK ERROR:",
+    subscriptionError
+  );
+}
 
 
   const { data: historyData, error: historyError } = await supabase

@@ -1,48 +1,126 @@
 "use client";
 
+import { supabase } from "@/lib/supabase";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function UpgradeButton() {
   const handlePayment = async () => {
-  console.log("Upgrade button clicked");
+    console.log("🔥 UPGRADE BUTTON CLICKED");
 
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create-order`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const {
+  data: { session },
+  error: sessionError,
+} = await supabase.auth.getSession();
 
-    const data = await response.json();
-    console.log(data);
+console.log("SESSION EXISTS:", !!session);
+console.log("TOKEN EXISTS:", !!session?.access_token);
+console.log("SESSION USER:", session?.user?.email);
+console.log("TOKEN LENGTH:", session?.access_token?.length);
 
-      if (!data.success) {
-        alert("Order creation failed");
+if (sessionError) {
+  console.error("SESSION ERROR:", sessionError);
+}
+
+if (!session?.access_token) {
+  alert("Please login first.");
+  return;
+}
+
+    if (sessionError) {
+      console.error("SESSION ERROR:", sessionError);
+    }
+
+    if (!session) {
+      alert("Please login first.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      console.log("ORDER STATUS:", response.status);
+
+      const data = await response.json();
+
+      console.log("ORDER RESPONSE:", data);
+
+      if (!response.ok || !data.success) {
+        alert(data.message || "Order creation failed");
         return;
       }
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // rzp_test_THRuB1r2vHb0TB
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: data.order.amount,
         currency: data.order.currency,
         name: "CLS AI",
         description: "CLS AI Pro Plan",
         order_id: data.order.id,
 
-        handler: function (response: any) {
-          alert(
-            "Payment Successful!\nPayment ID: " +
-              response.razorpay_payment_id
-          );
+        handler: async function (paymentResponse: any) {
+          console.log("PAYMENT RESPONSE:", paymentResponse);
 
-          console.log(response);
+          try {
+            const verifyResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/payment/verify-payment`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                  razorpay_order_id:
+                    paymentResponse.razorpay_order_id,
+                  razorpay_payment_id:
+                    paymentResponse.razorpay_payment_id,
+                  razorpay_signature:
+                    paymentResponse.razorpay_signature,
+                }),
+              }
+            );
+
+            const verifyData = await verifyResponse.json();
+
+            console.log("VERIFY RESPONSE:", verifyData);
+
+            if (!verifyResponse.ok || !verifyData.success) {
+              alert(
+                verifyData.message ||
+                  "Payment verification failed."
+              );
+              return;
+            }
+
+            alert(
+              "Payment successful! Creator Pro activated."
+            );
+
+            window.location.reload();
+          } catch (error) {
+            console.error("VERIFY ERROR:", error);
+            alert("Payment verify nahi ho saka.");
+          }
         },
 
         prefill: {
           name: "",
-          email: "",
+          email: session.user.email || "",
+          contact: "",
         },
 
         theme: {
@@ -50,18 +128,33 @@ export default function UpgradeButton() {
         },
       };
 
-      const paymentObject = new (window as any).Razorpay(options);
+      if (!window.Razorpay) {
+        alert("Razorpay load nahi hua. Page refresh karo.");
+        return;
+      }
+
+      const paymentObject = new window.Razorpay(options);
+
+      paymentObject.on(
+        "payment.failed",
+        function (response: any) {
+          console.error("PAYMENT FAILED:", response);
+          alert("Payment failed. Please try again.");
+        }
+      );
+
       paymentObject.open();
-    } catch (err) {
-      console.error(err);
-      alert("Payment failed");
+    } catch (error) {
+      console.error("PAYMENT ERROR:", error);
+      alert("Payment start nahi ho saka.");
     }
   };
 
   return (
     <button
+      type="button"
       onClick={handlePayment}
-      className="mt-6 bg-white text-blue-600 px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-50 hover:scale-105 transition"
+      className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
     >
       Upgrade to Pro →
     </button>

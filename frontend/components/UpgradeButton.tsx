@@ -1,25 +1,51 @@
 "use client";
 
+import { supabase } from "@/lib/supabase";
+
 export default function UpgradeButton() {
   const handlePayment = async () => {
-    console.log("Upgrade button clicked");
+    console.log("🔥 Upgrade button clicked");
 
     try {
+      // Get logged-in Supabase session
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      console.log("SESSION EXISTS:", !!session);
+      console.log("TOKEN EXISTS:", !!session?.access_token);
+      console.log("USER EMAIL:", session?.user?.email);
+
+      if (sessionError) {
+        console.error("SESSION ERROR:", sessionError);
+      }
+
+      if (!session?.access_token) {
+        alert("Please login first.");
+        return;
+      }
+
+      // Create Razorpay order
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create-order`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
           },
         }
       );
 
-      const data = await response.json();
-      console.log(data);
+      console.log("ORDER STATUS:", response.status);
 
-      if (!data.success) {
-        alert("Order creation failed");
+      const data = await response.json();
+
+      console.log("ORDER RESPONSE:", data);
+
+      if (!response.ok || !data.success) {
+        alert(data.message || "Order creation failed");
         return;
       }
 
@@ -39,18 +65,56 @@ export default function UpgradeButton() {
         description: "CLS AI Pro Plan",
         order_id: data.order.id,
 
-        handler: function (response: any) {
-          alert(
-            "Payment Successful!\nPayment ID: " +
-              response.razorpay_payment_id
-          );
+        handler: async function (paymentResponse: any) {
+          console.log("PAYMENT RESPONSE:", paymentResponse);
 
-          console.log("Payment response:", response);
+          try {
+            const verifyResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/payment/verify-payment`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                  razorpay_order_id:
+                    paymentResponse.razorpay_order_id,
+                  razorpay_payment_id:
+                    paymentResponse.razorpay_payment_id,
+                  razorpay_signature:
+                    paymentResponse.razorpay_signature,
+                }),
+              }
+            );
+
+            const verifyData = await verifyResponse.json();
+
+            console.log("VERIFY RESPONSE:", verifyData);
+
+            if (!verifyResponse.ok || !verifyData.success) {
+              alert(
+                verifyData.message ||
+                  "Payment verification failed."
+              );
+              return;
+            }
+
+            alert(
+              "Payment successful! Creator Pro activated."
+            );
+
+            window.location.reload();
+          } catch (error) {
+            console.error("VERIFY ERROR:", error);
+            alert("Payment verification failed.");
+          }
         },
 
         prefill: {
           name: "",
-          email: "",
+          email: session.user.email || "",
+          contact: "",
         },
 
         theme: {
@@ -58,18 +122,33 @@ export default function UpgradeButton() {
         },
       };
 
+      if (!(window as any).Razorpay) {
+        alert("Razorpay load nahi hua. Page refresh karo.");
+        return;
+      }
+
       const paymentObject = new (window as any).Razorpay(options);
+
+      paymentObject.on(
+        "payment.failed",
+        function (error: any) {
+          console.error("PAYMENT FAILED:", error);
+          alert("Payment failed. Please try again.");
+        }
+      );
+
       paymentObject.open();
-    } catch (err) {
-      console.error("Payment error:", err);
-      alert("Payment failed");
+    } catch (error) {
+      console.error("PAYMENT ERROR:", error);
+      alert("Payment start nahi ho saka.");
     }
   };
 
   return (
     <button
+      type="button"
       onClick={handlePayment}
-      className="mt-6 bg-white text-blue-600 px-6 py-3 rounded-lg font-bold shadow-lg hover:bg-blue-50 hover:scale-105 transition"
+      className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
     >
       Upgrade to Pro →
     </button>
