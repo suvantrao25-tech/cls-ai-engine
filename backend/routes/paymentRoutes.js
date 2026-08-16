@@ -38,22 +38,18 @@ console.log(
 
 // =====================================================
 // CREATE ORDER
+// INDIA + INTERNATIONAL
 // =====================================================
 
 router.post("/create-order", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
 
-    console.log("========== CREATE ORDER AUTH ==========");
-    console.log(
-      "Authorization header exists:",
-      !!authHeader
-    );
+    console.log("========== CREATE ORDER ==========");
 
-    console.log(
-      "Authorization starts with Bearer:",
-      authHeader?.startsWith("Bearer ")
-    );
+    // ---------------------------------------------
+    // AUTH CHECK
+    // ---------------------------------------------
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       console.log("❌ AUTH HEADER MISSING");
@@ -66,19 +62,13 @@ router.post("/create-order", async (req, res) => {
 
     const token = authHeader.replace("Bearer ", "");
 
-    console.log("✅ TOKEN RECEIVED");
-    console.log("Token length:", token.length);
-
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser(token);
 
-    console.log("========== SUPABASE USER CHECK ==========");
-    console.log("USER ID:", user?.id);
-    console.log("USER EMAIL:", user?.email);
+    console.log("USER:", user?.email);
     console.log("USER ERROR:", userError);
-    console.log("==========================================");
 
     if (userError || !user) {
       return res.status(401).json({
@@ -87,11 +77,69 @@ router.post("/create-order", async (req, res) => {
       });
     }
 
-    console.log("✅ USER AUTHENTICATED:", user.email);
+    // ---------------------------------------------
+    // GET REQUESTED CURRENCY
+    // ---------------------------------------------
+
+    const requestedCurrency =
+      typeof req.body?.currency === "string"
+        ? req.body.currency.toUpperCase()
+        : "INR";
+
+    console.log(
+      "REQUESTED CURRENCY:",
+      requestedCurrency
+    );
+
+    // ---------------------------------------------
+    // ALLOWED CURRENCIES
+    // ---------------------------------------------
+
+    const allowedCurrencies = ["INR", "USD"];
+
+    if (!allowedCurrencies.includes(requestedCurrency)) {
+      return res.status(400).json({
+        success: false,
+        message: "Unsupported payment currency",
+      });
+    }
+
+    // ---------------------------------------------
+    // PRICE
+    // ---------------------------------------------
+    //
+    // India:
+    // ₹299 = 29900 paise
+    //
+    // International:
+    // $3.99 = 399 cents
+    //
+    // IMPORTANT:
+    // Never accept amount from frontend.
+    // Backend decides the price.
+    // ---------------------------------------------
+
+    let amount;
+    let currency;
+
+    if (requestedCurrency === "USD") {
+      amount = 399;
+      currency = "USD";
+    } else {
+      amount = 29900;
+      currency = "INR";
+    }
+
+    console.log("FINAL CURRENCY:", currency);
+    console.log("FINAL AMOUNT:", amount);
+
+    // ---------------------------------------------
+    // CREATE RAZORPAY ORDER
+    // ---------------------------------------------
 
     const options = {
-      amount: 29900,
-      currency: "INR",
+      amount,
+      currency,
       receipt: `cls_ai_creator_${Date.now()}`,
     };
 
@@ -110,7 +158,10 @@ router.post("/create-order", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("========== CREATE ORDER ERROR ==========");
+    console.error(
+      "========== CREATE ORDER ERROR =========="
+    );
+
     console.error(error);
     console.error("Message:", error?.message);
     console.error("Status:", error?.statusCode);
@@ -118,7 +169,6 @@ router.post("/create-order", async (req, res) => {
       "Description:",
       error?.error?.description
     );
-    console.error("========================================");
 
     return res.status(500).json({
       success: false,

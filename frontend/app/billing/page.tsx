@@ -26,20 +26,24 @@ if (!session) {
       const response = await fetch(
   `${process.env.NEXT_PUBLIC_API_URL}/api/payment/create-order`,
   {
-          method: "POST",
-          headers: {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${session.access_token}`,
-},
-        }
-      );
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  }
+);
 
-      const data = await response.json();
+console.log("CREATE ORDER STATUS:", response.status);
 
-      if (!data.success) {
-        alert("Payment order create nahi hua");
-        return;
-      }
+const data = await response.json();
+
+console.log("CREATE ORDER RESPONSE:", data);
+
+if (!data.success) {
+  alert("Payment order create nahi hua");
+  return;
+}
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -94,9 +98,19 @@ if (!session) {
         },
       };
 
-      const razorpay = new window.Razorpay(options);
+      console.log("RAZORPAY OPTIONS:", options);
 
-      razorpay.open();
+const razorpay = new window.Razorpay(options);
+
+console.log("RAZORPAY INSTANCE CREATED");
+
+razorpay.on("payment.failed", function (response: any) {
+  console.error("RAZORPAY PAYMENT FAILED:", response);
+});
+
+razorpay.open();
+
+console.log("RAZORPAY OPEN CALLED");
     } catch (error) {
       console.error("Payment error:", error);
       alert("Payment start nahi ho saka");
