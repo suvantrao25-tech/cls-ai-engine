@@ -82,7 +82,7 @@ console.log("AIForm freeUses:", freeUses);
     try {
 
       const res = await fetch(
-        "https://cls-ai-engine.onrender.com/api/ai/generate",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ai/generate`,
         {
           method:"POST",
           headers:{

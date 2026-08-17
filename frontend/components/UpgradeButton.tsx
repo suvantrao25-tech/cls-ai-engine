@@ -48,7 +48,7 @@ export default function UpgradeButton() {
         browserLocale.toLowerCase().includes("-in") ||
         browserLocale.toLowerCase() === "en-in";
 
-      const requestedCurrency = isIndia ? "INR" : "USD";
+      const requestedCurrency = "INR";
 
       console.log("BROWSER LOCALE:", browserLocale);
       console.log("REQUESTED CURRENCY:", requestedCurrency);

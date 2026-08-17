@@ -95,7 +95,7 @@ router.post("/create-order", async (req, res) => {
     // ALLOWED CURRENCIES
     // ---------------------------------------------
 
-    const allowedCurrencies = ["INR", "USD"];
+    const allowedCurrencies = ["INR"];
 
     if (!allowedCurrencies.includes(requestedCurrency)) {
       return res.status(400).json({
@@ -122,10 +122,7 @@ router.post("/create-order", async (req, res) => {
     let amount;
     let currency;
 
-    if (requestedCurrency === "USD") {
-      amount = 399;
-      currency = "USD";
-    } else {
+    if (requestedCurrency === "INR") {
       amount = 29900;
       currency = "INR";
     }

@@ -191,7 +191,7 @@ Generate:
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-120b",
         messages: [
           {
             role: "system",
@@ -204,7 +204,7 @@ Generate:
         ],
 
         temperature: 0.5,
-        max_tokens: 8000,
+        max_tokens: 3000,
 
       },
 
@@ -391,14 +391,14 @@ return result;
 
 
   } catch (error) {
+    console.error("========== GROQ ERROR ==========");
+    console.error("STATUS:", error.response?.status);
+    console.error("DATA:", error.response?.data);
+    console.error("MESSAGE:", error.message);
+    console.error("================================");
 
-    console.log(
-      "GROQ ERROR:",
-      error.response?.data || error.message
-    );
-
-    return "AI temporarily unavailable";
-  }
+    return `GROQ ERROR: ${error.response?.status || ""} - ${JSON.stringify(error.response?.data || error.message)}`;
+}
 };
 
 module.exports = { generateResponse };
