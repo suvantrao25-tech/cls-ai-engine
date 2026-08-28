@@ -1,10 +1,16 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
 
 app.use(cors());
+
+// Razorpay webhook MUST receive the raw request body
+// before express.json() parses it.
+const razorpayWebhookRoutes = require("./routes/razorpayWebhookRoutes");
+app.use("/api/webhook/razorpay", razorpayWebhookRoutes);
+
 app.use(express.json());
 
 // Routes
